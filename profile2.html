@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>رصيدي</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>رصيدك الحالي</h1>
+        <p>👤 المستخدم: <span id="user-username">...</span></p>
+        <p>📧 البريد: <span id="user-email">...</span></p>
+        <p>💰 الرصيد: <span id="user-wallet">...</span> جنيه</p>
+        <button onclick="logout()">تسجيل الخروج</button>
+    </div>
+    <script src="main.js"></script>
+</body>
+</html>
