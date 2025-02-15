@@ -72,6 +72,32 @@ function login() {
         });
 }
 
+// 🔹 جلب بيانات المستخدم من Firestore عند فتح صفحة `profile2.html`
+firebase.auth().onAuthStateChanged((user) => {
+    if (user) {
+        console.log("✅ المستخدم مسجل دخول:", user.email);
+
+        // جلب بيانات المستخدم من Firestore
+        db.collection("users").doc(user.uid).get().then((doc) => {
+            if (doc.exists) {
+                const userData = doc.data();
+                document.getElementById('user-username').textContent = userData.username;
+                document.getElementById('user-email').textContent = userData.email;
+                document.getElementById('user-wallet').textContent = userData.wallet + " جنيه";
+                console.log("✅ تم تحميل بيانات المستخدم:", userData);
+            } else {
+                console.error("❌ لا يوجد بيانات للمستخدم في Firestore!");
+            }
+        }).catch((error) => {
+            console.error("❌ خطأ أثناء جلب البيانات من Firestore:", error);
+        });
+
+    } else {
+        console.warn("⚠️ لا يوجد مستخدم مسجل دخول!");
+        window.location.href = 'login.html';
+    }
+});
+
 // تسجيل الخروج
 function logout() {
     firebase.auth().signOut().then(() => {
