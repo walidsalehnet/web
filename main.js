@@ -13,55 +13,50 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// تحديد الصفحات التي تتطلب تسجيل دخول
-const protectedPages = ["/profile2.html"];
+// إنشاء حساب جديد
+function signUp() {
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const username = document.getElementById('username').value;
 
-// التحقق مما إذا كان المستخدم مسجل دخول
-firebase.auth().onAuthStateChanged((user) => {
-    const currentPage = window.location.pathname;
+    firebase.auth().createUserWithEmailAndPassword(email, password)
+        .then((userCredential) => {
+            const user = userCredential.user;
+            user.updateProfile({ displayName: username });
 
-    if (user) {
-        console.log("✅ المستخدم مسجل دخول:", user.email);
+            const userData = {
+                email: email,
+                username: username,
+                wallet: 0  // يبدأ الرصيد بـ 0
+            };
 
-        // جلب بيانات المستخدم فقط إذا كان في صفحة `profile2.html`
-        if (currentPage === "/profile2.html") {
-            db.collection("users").doc(user.uid).get()
-                .then((doc) => {
-                    if (doc.exists) {
-                        const userData = doc.data();
-                        document.getElementById('user-username').textContent = userData.username;
-                        document.getElementById('user-email').textContent = userData.email;
-                        document.getElementById('user-wallet').textContent = userData.wallet + " جنيه";
-                        console.log("✅ تم تحميل بيانات المستخدم:", userData);
-                    } else {
-                        console.warn("⚠️ لم يتم العثور على بيانات المستخدم في Firestore.");
-                        document.getElementById('user-wallet').textContent = "غير متاح";
-                    }
+            // حفظ بيانات المستخدم في Firestore
+            db.collection("users").doc(user.uid).set(userData)
+                .then(() => {
+                    console.log("✅ المستخدم تمت إضافته إلى Firestore!");
+
+                    // إرسال إشعار إلى بوت تيليجرام
+                    fetch('https://api.telegram.org/bot7834569515:AAHGBtlyJ-clDjc_jv2j9TDudV0K0AlRjeo/sendMessage', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            chat_id: '6798744902', // ضع معرف الشات الإداري هنا
+                            text: `🆕 مستخدم جديد سجل في الموقع!\n👤 الاسم: ${username}\n📧 البريد: ${email}`
+                        })
+                    });
+
+                    alert('🎉 تم إنشاء الحساب بنجاح!');
+                    window.location.href = 'login.html';
                 })
                 .catch((error) => {
-                    console.error("❌ خطأ أثناء جلب البيانات من Firestore:", error);
+                    console.error("❌ خطأ أثناء حفظ المستخدم في Firestore:", error);
                 });
-        }
 
-    } else {
-        console.warn("⚠️ لا يوجد مستخدم مسجل دخول!");
-
-        // ✅ السماح للصفحات العامة بالعمل بدون تسجيل دخول
-        if (protectedPages.includes(currentPage)) {
-            console.log("🔒 هذه الصفحة تتطلب تسجيل دخول. يتم التوجيه إلى login.html...");
-            setTimeout(() => {
-                window.location.href = "login.html";
-            }, 1000); // تأخير بسيط لمنع التحميل المتكرر
-        }
-    }
-});
-
-// تسجيل الخروج
-function logout() {
-    firebase.auth().signOut().then(() => {
-        console.log("✅ تم تسجيل الخروج! يتم التوجيه إلى صفحة تسجيل الدخول...");
-        setTimeout(() => {
-            window.location.href = "login.html";
-        }, 1000); // تأخير بسيط قبل إعادة التوجيه
-    });
+        })
+        .catch((error) => {
+            alert(error.message);
+        });
 }
+
+// ربط الدالة `signUp()` بحيث يمكن استدعاؤها من `signup.html`
+window.signUp = signUp;
