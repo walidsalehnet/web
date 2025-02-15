@@ -12,7 +12,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// إنشاء حساب جديد
+// إنشاء حساب جديد وحفظه في Firestore
 function signUp() {
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
@@ -29,13 +29,13 @@ function signUp() {
                 wallet: 0  // يبدأ الرصيد بـ 0 جنيه
             };
 
-            // حفظ بيانات المستخدم في Firestore
-            db.collection("users").doc(user.uid).set(userData)
+            // التأكد من أن المستخدم قد تمت إضافته إلى Firestore
+            return db.collection("users").doc(user.uid).set(userData)
                 .then(() => {
-                    console.log("✅ المستخدم تمت إضافته إلى Firestore!");
+                    console.log("✅ المستخدم تمت إضافته إلى Firestore:", userData);
 
                     // إرسال إشعار إلى بوت تيليجرام
-                    fetch('https://api.telegram.org/bot7834569515:AAHGBtlyJ-clDjc_jv2j9TDudV0K0AlRjeo/sendMessage', {
+                    return fetch('https://api.telegram.org/bot7834569515:AAHGBtlyJ-clDjc_jv2j9TDudV0K0AlRjeo/sendMessage', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
@@ -43,16 +43,14 @@ function signUp() {
                             text: `🆕 مستخدم جديد سجل في الموقع!\n👤 الاسم: ${username}\n📧 البريد: ${email}`
                         })
                     });
-
+                })
+                .then(() => {
                     alert('🎉 تم إنشاء الحساب بنجاح!');
                     window.location.href = 'login.html';
-                })
-                .catch((error) => {
-                    console.error("❌ خطأ أثناء حفظ المستخدم في Firestore:", error);
                 });
-
         })
         .catch((error) => {
+            console.error("❌ خطأ أثناء تسجيل الحساب أو حفظه في Firestore:", error);
             alert(error.message);
         });
 }
