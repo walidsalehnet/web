@@ -29,7 +29,23 @@ function signUp() {
                 username: username,
                 wallet: 0  // يبدأ الرصيد بـ 0
             };
+function login() {
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
 
+    firebase.auth().signInWithEmailAndPassword(email, password)
+        .then((userCredential) => {
+            console.log("✅ تسجيل الدخول ناجح:", userCredential.user.email);
+            window.location.href = 'profile2.html';
+        })
+        .catch((error) => {
+            console.error("❌ خطأ أثناء تسجيل الدخول:", error.message);
+            alert(error.message);
+        });
+}
+
+// ربط الدالة `login()` بحيث يمكن استدعاؤها من `login.html`
+window.login = login;
             // حفظ بيانات المستخدم في Firestore
             db.collection("users").doc(user.uid).set(userData)
                 .then(() => {
