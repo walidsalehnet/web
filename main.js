@@ -24,27 +24,33 @@ function signUp() {
             user.updateProfile({ displayName: username });
 
             const userData = {
-                id: user.uid,
-                username: username,
                 email: email,
-                wallet: 0
+                username: username,
+                wallet: 0  // يبدأ الرصيد بـ 0
             };
 
             // حفظ بيانات المستخدم في Firestore
-            db.collection("users").doc(user.uid).set(userData).then(() => {
-                // إرسال إشعار إلى بوت تيليجرام
-                fetch('https://api.telegram.org/bot7834569515:AAHGBtlyJ-clDjc_jv2j9TDudV0K0AlRjeo/sendMessage', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        chat_id: '6798744902',
-                        text: `🆕 مستخدم جديد سجل في الموقع!\n👤 الاسم: ${username}\n📧 البريد: ${email}\n🆔 ID: ${user.uid}`
-                    })
+            db.collection("users").doc(user.uid).set(userData)
+                .then(() => {
+                    console.log("✅ المستخدم تمت إضافته إلى Firestore!");
+
+                    // إرسال إشعار للبوت الإداري
+                    fetch('https://api.telegram.org/bot7834569515:AAHGBtlyJ-clDjc_jv2j9TDudV0K0AlRjeo/sendMessage', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            chat_id: '6798744902', // ضع معرف الشات الإداري هنا
+                            text: `🆕 مستخدم جديد سجل في الموقع!\n👤 الاسم: ${username}\n📧 البريد: ${email}`
+                        })
+                    });
+
+                    alert('🎉 تم إنشاء الحساب بنجاح!');
+                    window.location.href = 'login.html';
+                })
+                .catch((error) => {
+                    console.error("❌ خطأ أثناء حفظ المستخدم في Firestore:", error);
                 });
 
-                alert('🎉 تم إنشاء الحساب بنجاح! يمكنك تسجيل الدخول الآن.');
-                window.location.href = 'login.html';
-            });
         })
         .catch((error) => {
             alert(error.message);
@@ -65,12 +71,11 @@ function login() {
         });
 }
 
-// استرجاع بيانات الرصيد وعرضها في صفحة الحساب
+// جلب بيانات المستخدمين وعرضها
 firebase.auth().onAuthStateChanged((user) => {
     if (user) {
         document.getElementById('user-username').textContent = user.displayName;
         document.getElementById('user-email').textContent = user.email;
-        document.getElementById('user-id').textContent = user.uid;
 
         db.collection("users").doc(user.uid).get().then((doc) => {
             if (doc.exists) {
