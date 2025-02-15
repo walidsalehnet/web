@@ -1,55 +1,97 @@
-// تحميل Firebase بعد تحميل الصفحة بالكامل
-document.addEventListener("DOMContentLoaded", function () {
-    console.log("✅ الصفحة جاهزة!");
+// تكوين Firebase
+const firebaseConfig = {
+    apiKey: "AIzaSyAdf5AKFgLXgK2PYERHw1hgF_HsMmuTfuo",
+    authDomain: "noproblem-55b97.firebaseapp.com",
+    projectId: "noproblem-55b97",
+    storageBucket: "noproblem-55b97.firebasestorage.app",
+    messagingSenderId: "316010224446",
+    appId: "1:316010224446:web:5d7e7f792e53ee4b396a6f",
+    measurementId: "G-VKSGWBRKVL"
+};
 
-    if (!firebase.apps.length) {
-        console.log("🚀 جاري تهيئة Firebase...");
-        const firebaseConfig = {
-            apiKey: "AIzaSyAdf5AKFgLXgK2PYERHw1hgF_HsMmuTfuo",
-            authDomain: "noproblem-55b97.firebaseapp.com",
-            projectId: "noproblem-55b97",
-            storageBucket: "noproblem-55b97.firebasestorage.app",
-            messagingSenderId: "316010224446",
-            appId: "1:316010224446:web:5d7e7f792e53ee4b396a6f",
-            measurementId: "G-VKSGWBRKVL"
-        };
+// تأكد من تحميل Firebase قبل استخدامه
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 
-        firebase.initializeApp(firebaseConfig);
-        console.log("✅ Firebase تم تهيئته بنجاح!");
-    }
+// إنشاء حساب جديد
+function signUp() {
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const username = document.getElementById('username').value;
 
-    const db = firebase.firestore();
+    firebase.auth().createUserWithEmailAndPassword(email, password)
+        .then((userCredential) => {
+            const user = userCredential.user;
+            user.updateProfile({ displayName: username });
 
-    // مراقبة حالة تسجيل الدخول
-    firebase.auth().onAuthStateChanged((user) => {
-        if (user) {
-            console.log("🔹 المستخدم مسجل دخول:", user.email);
+            const userData = {
+                email: email,
+                username: username,
+                wallet: 0  // يبدأ الرصيد بـ 0
+            };
 
-            // ✅ متابعة التحديثات الفورية للرصيد في Firestore
-            db.collection("users").doc(user.uid).onSnapshot((doc) => {
-                if (doc.exists) {
-                    const userData = doc.data();
-                    document.getElementById('user-username').textContent = userData.username;
-                    document.getElementById('user-email').textContent = userData.email;
-                    document.getElementById('user-wallet').textContent = userData.wallet + " جنيه";
-                    console.log("✅ تم تحديث بيانات المستخدم:", userData);
-                } else {
-                    console.error("❌ لا يوجد بيانات للمستخدم في Firestore!");
-                }
-            });
-        } else {
-            console.warn("⚠️ لا يوجد مستخدم مسجل دخول!");
-            window.location.href = 'login.html';
-        }
-    });
+            // حفظ بيانات المستخدم في Firestore
+            db.collection("users").doc(user.uid).set(userData)
+                .then(() => {
+                    console.log("✅ المستخدم تمت إضافته إلى Firestore!");
 
-    // تسجيل الخروج
-    function logout() {
-        console.log("🚪 تسجيل الخروج...");
-        firebase.auth().signOut().then(() => {
-            window.location.href = 'login.html';
+                    // إرسال إشعار إلى بوت تيليجرام
+                    fetch('https://api.telegram.org/bot7834569515:AAHGBtlyJ-clDjc_jv2j9TDudV0K0AlRjeo/sendMessage', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            chat_id: '6798744902', // ضع معرف الشات الإداري هنا
+                            text: `🆕 مستخدم جديد سجل في الموقع!\n👤 الاسم: ${username}\n📧 البريد: ${email}`
+                        })
+                    });
+
+                    alert('🎉 تم إنشاء الحساب بنجاح!');
+                    window.location.href = 'login.html';
+                })
+                .catch((error) => {
+                    console.error("❌ خطأ أثناء حفظ المستخدم في Firestore:", error);
+                });
+
+        })
+        .catch((error) => {
+            alert(error.message);
         });
-    }
+}
 
-    window.logout = logout;
+// تسجيل الدخول
+function login() {
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+
+    firebase.auth().signInWithEmailAndPassword(email, password)
+        .then((userCredential) => {
+            window.location.href = 'profile2.html';
+        })
+        .catch((error) => {
+            alert(error.message);
+        });
+}
+
+// جلب بيانات المستخدم وتحديثها في `profile2.html`
+firebase.auth().onAuthStateChanged((user) => {
+    if (user) {
+        document.getElementById('user-username').textContent = user.displayName;
+        document.getElementById('user-email').textContent = user.email;
+
+        // جلب الرصيد من Firestore
+        db.collection("users").doc(user.uid).get().then((doc) => {
+            if (doc.exists) {
+                document.getElementById('user-wallet').textContent = doc.data().wallet + " جنيه";
+            }
+        });
+    } else {
+        window.location.href = 'login.html';
+    }
 });
+
+// تسجيل الخروج
+function logout() {
+    firebase.auth().signOut().then(() => {
+        window.location.href = 'login.html';
+    });
+}
