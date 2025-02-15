@@ -1,8 +1,7 @@
-// تحميل مكتبات Firebase بعد تحميل الصفحة بالكامل
+// تحميل Firebase بعد تحميل الصفحة بالكامل
 document.addEventListener("DOMContentLoaded", function () {
     console.log("✅ الصفحة جاهزة!");
 
-    // التحقق من تحميل Firebase قبل استخدامه
     if (!firebase.apps.length) {
         console.log("🚀 جاري تهيئة Firebase...");
         const firebaseConfig = {
@@ -17,79 +16,40 @@ document.addEventListener("DOMContentLoaded", function () {
 
         firebase.initializeApp(firebaseConfig);
         console.log("✅ Firebase تم تهيئته بنجاح!");
-    } else {
-        console.log("⚠️ Firebase كان مهيأ بالفعل.");
     }
 
-    // التحقق من أن Firestore متاح قبل استخدامه
-    if (typeof firebase.firestore === "function") {
-        const db = firebase.firestore(); // 🔹 Firestore جاهز الآن
+    const db = firebase.firestore();
 
-        // إنشاء حساب جديد وحفظه في Firestore
-        function signUp() {
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const username = document.getElementById('username').value;
+    // مراقبة حالة تسجيل الدخول
+    firebase.auth().onAuthStateChanged((user) => {
+        if (user) {
+            console.log("🔹 المستخدم مسجل دخول:", user.email);
 
-            firebase.auth().createUserWithEmailAndPassword(email, password)
-                .then((userCredential) => {
-                    const user = userCredential.user;
-                    return user.updateProfile({ displayName: username }).then(() => {
-                        return db.collection("users").doc(user.uid).set({
-                            email: email,
-                            username: username,
-                            wallet: 0 // يبدأ الرصيد بـ 0 جنيه
-                        });
-                    }).then(() => {
-                        console.log("✅ المستخدم تمت إضافته إلى Firestore:", email);
-
-                        // إرسال إشعار إلى بوت تيليجرام
-                        return fetch('https://api.telegram.org/bot7834569515:AAHGBtlyJ-clDjc_jv2j9TDudV0K0AlRjeo/sendMessage', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                chat_id: '6798744902', // ضع معرف الشات الإداري هنا
-                                text: `🆕 مستخدم جديد سجل في الموقع!\n👤 الاسم: ${username}\n📧 البريد: ${email}`
-                            })
-                        });
-                    }).then(() => {
-                        alert('🎉 تم إنشاء الحساب بنجاح!');
-                        window.location.href = 'login.html';
-                    });
-                })
-                .catch((error) => {
-                    console.error("❌ خطأ أثناء تسجيل الحساب أو حفظه في Firestore:", error);
-                    alert(error.message);
-                });
-        }
-
-        // تسجيل الدخول
-        function login() {
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-
-            firebase.auth().signInWithEmailAndPassword(email, password)
-                .then(() => {
-                    window.location.href = 'profile2.html';
-                })
-                .catch((error) => {
-                    alert(error.message);
-                });
-        }
-
-        // تسجيل الخروج
-        function logout() {
-            firebase.auth().signOut().then(() => {
-                window.location.href = 'login.html';
+            // ✅ متابعة التحديثات الفورية للرصيد في Firestore
+            db.collection("users").doc(user.uid).onSnapshot((doc) => {
+                if (doc.exists) {
+                    const userData = doc.data();
+                    document.getElementById('user-username').textContent = userData.username;
+                    document.getElementById('user-email').textContent = userData.email;
+                    document.getElementById('user-wallet').textContent = userData.wallet + " جنيه";
+                    console.log("✅ تم تحديث بيانات المستخدم:", userData);
+                } else {
+                    console.error("❌ لا يوجد بيانات للمستخدم في Firestore!");
+                }
             });
+        } else {
+            console.warn("⚠️ لا يوجد مستخدم مسجل دخول!");
+            window.location.href = 'login.html';
         }
+    });
 
-        // ربط الدوال بالأزرار في HTML
-        window.signUp = signUp;
-        window.login = login;
-        window.logout = logout;
-
-    } else {
-        console.error("❌ Firestore غير متوفر! تأكد من تحميل `firebase-firestore.js` في `index.html`.");
+    // تسجيل الخروج
+    function logout() {
+        console.log("🚪 تسجيل الخروج...");
+        firebase.auth().signOut().then(() => {
+            window.location.href = 'login.html';
+        });
     }
+
+    window.logout = logout;
 });
