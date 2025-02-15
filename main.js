@@ -10,7 +10,8 @@ const firebaseConfig = {
 };
 
 firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+const db = firebase.firestore(); // تأكد إنه هنا بعد التهيئة مباشرةً
+
 
 // تسجيل الدخول
 function login() {
