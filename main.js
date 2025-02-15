@@ -26,7 +26,7 @@ function signUp() {
             const userData = {
                 email: email,
                 username: username,
-                wallet: 0  // يبدأ الرصيد بـ 0
+                wallet: 0  // يبدأ الرصيد بـ 0 جنيه
             };
 
             // حفظ بيانات المستخدم في Firestore
@@ -34,7 +34,7 @@ function signUp() {
                 .then(() => {
                     console.log("✅ المستخدم تمت إضافته إلى Firestore!");
 
-                    // إرسال إشعار للبوت الإداري
+                    // إرسال إشعار إلى بوت تيليجرام
                     fetch('https://api.telegram.org/bot7834569515:AAHGBtlyJ-clDjc_jv2j9TDudV0K0AlRjeo/sendMessage', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -70,22 +70,6 @@ function login() {
             alert(error.message);
         });
 }
-
-// جلب بيانات المستخدمين وعرضها
-firebase.auth().onAuthStateChanged((user) => {
-    if (user) {
-        document.getElementById('user-username').textContent = user.displayName;
-        document.getElementById('user-email').textContent = user.email;
-
-        db.collection("users").doc(user.uid).get().then((doc) => {
-            if (doc.exists) {
-                document.getElementById('user-wallet').textContent = doc.data().wallet;
-            }
-        });
-    } else {
-        window.location.href = 'login.html';
-    }
-});
 
 // تسجيل الخروج
 function logout() {
