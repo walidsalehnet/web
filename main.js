@@ -42,22 +42,32 @@ function signUp() {
         .then((userCredential) => {
             const user = userCredential.user;
             user.updateProfile({ displayName: username });
-            user.sendEmailVerification();
+
+            // حفظ بيانات المستخدم في Firestore
             db.collection("users").doc(user.uid).set({
                 username: username,
                 email: email,
                 wallet: 0
+            }).then(() => {
+                // إرسال إشعار إلى بوت تيليجرام
+                fetch('https://api.telegram.org/bot7834569515:AAHGBtlyJ-clDjc_jv2j9TDudV0K0AlRjeo/sendMessage', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        chat_id: 'YOUR_ADMIN_CHAT_ID',
+                        text: `🆕 مستخدم جديد سجل في الموقع!\n👤 الاسم: ${username}\n📧 البريد: ${email}`
+                    })
+                });
+
+                alert('🎉 تم إنشاء الحساب بنجاح! يمكنك تسجيل الدخول الآن.');
+                window.location.href = 'login.html';
             });
-            alert('تم إرسال بريد التحقق، يرجى التأكيد.');
         })
         .catch((error) => {
             alert(error.message);
         });
 }
-
-// استرجاع بيانات الرصيد
-firebase.auth().onAuthStateChanged((user) => {
-    if (user && user.emailVerified) {
+emailVerified) {
         document.getElementById('user-username').textContent = user.displayName;
         document.getElementById('user-email').textContent = user.email;
         db.collection("users").doc(user.uid).get().then((doc) => {
