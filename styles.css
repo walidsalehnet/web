@@ -1,10 +1,14 @@
-
+/* ✅ تحسين الألوان وجعل التصميم أكثر جاذبية */
 body {
-    font-family: Cairo, sans-serif;
-    background-color: #000000bd; /* لون خلفية فاتح للصفحة */
-    color: #0056b3; /* لون نص أساسي داكن */
+    font-family: 'Cairo', sans-serif;
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    color: #ffffff;
+    margin: 0;
+    padding: 0;
+    text-align: center;
 }
 
+/* ✅ تأثيرات دخول سلسة */
 @keyframes slideIn {
     from {
         transform: translateY(-50px);
@@ -16,116 +20,52 @@ body {
     }
 }
 
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
-}
-.message-popup {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background-color: #007bff;
-    color: white;
-    padding: 15px;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    z-index: 1000;
-    max-width: 300px;
-    width: 90%;
-    text-align: center;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.5s ease, visibility 0.5s ease;
-}
-
-.close-btn {
-    position: absolute;
-    top: 5px;
-    right: 10px;
-    cursor: pointer;
-    color: #ff0000;
-    font-size: 18px;
-}
-
-.close-btn:hover {
-    color: white;
-}
-
-/* تأثير تغيير اللون */
-@keyframes colorChange {
-    0% {
-        color: #0056b3;
-    
-    }
-    50% {
-        color: #0056b3;
-    }
-    100% {
-        color: #007bff;
-    }
-}
-
-/* تنسيق الحاوية */
+/* ✅ تصميم الحاوية بشكل أنيق */
 .container {
-    background: rgba(0, 0, 0, 0.95);
+    background: rgba(255, 255, 255, 0.1);
     padding: 30px;
     border-radius: 15px;
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
     max-width: 400px;
     width: 90%;
     margin: 20px auto;
     text-align: center;
-    transition: transform 0.3s ease-in-out, background 0.3s ease-in-out;
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(15px);
     animation: slideIn 0.5s ease forwards;
 }
 
-.container:hover {
-    transform: scale(1.03);
-    background: rgba(0, 0, 0, 0.836);
-    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2); /* زيادة الظل عند التحويم */
-    border: 1px solid #fc0303; /* إضافة إطار بلون أخضر عند التحويم */
-}
-
-/* تأثير تغيير العنوان */
+/* ✅ تحسين مظهر العناوين */
 h1 {
-    color: #333;
+    color: #ffcc00;
     margin-bottom: 20px;
     font-size: 28px;
     font-weight: bold;
-    animation: colorChange 3s infinite;
+    animation: fadeIn 1s ease forwards;
 }
 
-/* تنسيق حقول الإدخال */
+/* ✅ تحسين الحقول */
 input[type="text"], input[type="email"], input[type="password"] {
     width: 100%;
-    padding: 14px;
+    padding: 12px;
     margin: 12px 0;
-    border: 1px solid #ccc;
+    border: 1px solid #ffcc00;
     border-radius: 25px;
-    transition: all 0.3s ease;
     background: rgba(255, 255, 255, 0.9);
     font-size: 16px;
     box-sizing: border-box;
 }
 
-input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focus {
-    border-color: #007bff;
-    outline: none;
+input:focus {
+    border-color: #ffaa00;
     background: rgba(255, 255, 255, 1);
     transform: scale(1.02);
 }
 
-/* تنسيق الأزرار */
+/* ✅ تحسين الأزرار */
 button {
     width: 100%;
     padding: 14px;
-    background: linear-gradient(135deg, #ff0000, #ff0000);
+    background: linear-gradient(135deg, #ff7b00, #ffcc00);
     border: none;
     border-radius: 25px;
     color: #fff;
@@ -137,168 +77,35 @@ button {
 }
 
 button:hover {
-    background: linear-gradient(135deg, #ff0202, #fa0606);
+    background: linear-gradient(135deg, #ff8800, #ffdd44);
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
     transform: translateY(-3px);
 }
 
-/* تنسيق الفقرات والروابط */
-p {
-    margin: 20px 0;
-    font-size: 16px;
-    color: #666;
-    line-height: 1.6;
-    transition: color 0.3s ease;
-    animation: fadeIn 0.5s ease forwards;
-}
-
-p:hover {
-    color: #333;
-}
-
+/* ✅ تحسين الروابط */
 a {
-    color: #ff0000;
+    color: #ffcc00;
     text-decoration: none;
     transition: color 0.3s ease;
 }
 
 a:hover {
-    color: #ff0000;
-    text-decoration: underline; /* خط تحت الرابط عند التحويم */
+    color: #ffaa00;
+    text-decoration: underline;
 }
 
-/* توافق الشاشات */
-@media (max-width: 768px) {
-    .container {
-        width: 80%;
-    }
-    h1 {
-        font-size: 24px;
-    }
-    button {
-        font-size: 16px;
-    }
-}
-
-@media (min-width: 768px) and (max-width: 992px) {
-    .container {
-        width: 70%;
-    }
-}
-
-@media (min-width: 992px) {
-    .container {
-        width: 50%;
-    }
-}
-
-/* استايل الرسالة المنبثقة */
+/* ✅ تنسيق الرسائل المنبثقة */
 .message-popup {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background-color: rgba(255, 255, 255, 0.9);
-    padding: 20px;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: #ffcc00;
     border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    z-index: 1000;
-    max-width: 300px;
-    width: 90%;
-    text-align: center;
-    opacity: 0;
-    visibility: hidden;
-    animation: slideInMessage 0.5s ease-out forwards, fadeOutMessage 3s 2.5s ease-out forwards;
 }
+.message-popup.success { background-color: #28a745; }
+.message-popup.error { background-color: #dc3545; }
+.message-popup.warning { background-color: #ffc107; color: black; }
+.message-popup.info { background-color: #17a2b8; }
 
-@keyframes slideInMessage {
-    from {
-        transform: translate(-50%, -70%);
-        opacity: 0;
-        visibility: hidden;
-    }
-    to {
-        transform: translate(-50%, -50%);
-        opacity: 1;
-        visibility: visible;
-    }
-}
-
-@keyframes fadeOutMessage {
-    to {
-        opacity: 0;
-        visibility: hidden;
-    }
-}
-
-.close-btn {
-    position: absolute;
-    top: 5px;
-    right: 10px;
-    cursor: pointer;
-    color: #777;
-    font-size: 20px;
-    transition: color 0.3s ease;
-}
-
+/* ✅ تحسين زر الإغلاق */
 .close-btn:hover {
-    color: #333;
-}
-
-.button-container {
-    margin-top: 20px;
-}
-
-.button-container button {
-    background: linear-gradient(135deg, #ff0000, #ff0000);
-    border: none;
-    border-radius: 25px;
-    color: #fff;
-    font-size: 16px;
-    font-weight: bold;
-    padding: 10px 20px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    margin-right: 10px;
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-}
-
-.button-container button:hover {
-    background: linear-gradient(135deg, #ff0000, #ff0000);
-    transform: translateY(-3px);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-}
-
-/* تطبيق تأثير fade-in على الصور والنصوص */
-img, p {
-    animation: fadeIn 0.5s ease forwards;
-}
-.button-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-top: 20px;
-}
-
-.button-container button {
-    background: linear-gradient(135deg, #ff0000, #ff0000); /* اللون الأخضر */
-    border: none;
-    border-radius: 25px;
-    color: #fff;
-    font-size: 16px;
-    font-weight: bold;
-    padding: 10px 40px; /* زيادة العرض لتتوسط الزر بشكل أفضل */
-    cursor: pointer;
-    transition: all 0.3s ease;
-    margin: 10px 0; /* تباعد بين الأزرار */
-    width: 100%; /* لجعل الأزرار بعرض كامل الحاوية */
-    max-width: 300px; /* أقصى عرض للزر */
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-    text-align: center;
-}
-
-.button-container button:hover {
-    background: linear-gradient(135deg, #ff0000, #ff0000); /* تبديل اللون عند التحويم */
-    transform: translateY(-3px);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    color: #ffcc00;
 }
