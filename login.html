@@ -5,17 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
     <link rel="stylesheet" href="styles.css">
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-    <script src="main.js"></script>
 </head>
 <body>
     <div class="container">
-        <h1>Login</h1>
+        <h1>تسجيل الدخول</h1>
         <input type="email" id="email" placeholder="البريد الإلكتروني">
         <input type="password" id="password" placeholder="كلمة المرور">
         <button onclick="login()">تسجيل</button>
         <p>لا تملك حساب؟ <a href="signup.html">إنشاء حساب</a></p>
     </div>
+
+    <!-- ✅ إضافة مكتبات Firebase هنا قبل `</body>` -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+    <!-- ✅ تحميل ملف `main.js` بعد Firebase -->
+    <script src="main.js"></script>
 </body>
 </html>
