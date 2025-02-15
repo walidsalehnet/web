@@ -72,23 +72,6 @@ function login() {
         });
 }
 
-// جلب بيانات المستخدم وتحديثها في `profile2.html`
-firebase.auth().onAuthStateChanged((user) => {
-    if (user) {
-        document.getElementById('user-username').textContent = user.displayName;
-        document.getElementById('user-email').textContent = user.email;
-
-        // جلب الرصيد من Firestore
-        db.collection("users").doc(user.uid).get().then((doc) => {
-            if (doc.exists) {
-                document.getElementById('user-wallet').textContent = doc.data().wallet + " جنيه";
-            }
-        });
-    } else {
-        window.location.href = 'login.html';
-    }
-});
-
 // تسجيل الخروج
 function logout() {
     firebase.auth().signOut().then(() => {
