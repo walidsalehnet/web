@@ -9,12 +9,11 @@ const firebaseConfig = {
     measurementId: "G-VKSGWBRKVL"
 };
 
-// ✅ تأكد من تحميل Firebase قبل استخدامه
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
 // ✅ إرسال إشعار إلى بوت تيليجرام
-const TELEGRAM_CHAT_ID = "6798744902";  // استبدل بمعرف الشات الإداري
+const TELEGRAM_CHAT_ID = "6798744902";  
 const TELEGRAM_BOT_TOKEN = "7834569515:AAHGBtlyJ-clDjc_jv2j9TDudV0K0AlRjeo";
 
 function sendTelegramNotification(message) {
@@ -29,14 +28,24 @@ function sendTelegramNotification(message) {
     .catch(error => console.error("❌ خطأ أثناء إرسال الإشعار إلى البوت:", error));
 }
 
-// ✅ إنشاء حساب جديد
+// ✅ إنشاء رسالة منبثقة
+function showPopupMessage(message) {
+    const popup = document.createElement("div");
+    popup.className = "message-popup";
+    popup.innerHTML = `<span class="close-btn" onclick="this.parentElement.style.display='none'">&times;</span> ${message}`;
+    document.body.appendChild(popup);
+    setTimeout(() => { popup.style.opacity = "1"; popup.style.visibility = "visible"; }, 100);
+    setTimeout(() => { popup.style.opacity = "0"; popup.style.visibility = "hidden"; popup.remove(); }, 4000);
+}
+
+// ✅ إنشاء حساب جديد مع التحقق من البريد
 function signUp() {
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
     const username = document.getElementById('username').value;
 
     if (!email || !password || !username) {
-        alert("❌ الرجاء إدخال جميع البيانات!");
+        showPopupMessage("❌ الرجاء إدخال جميع البيانات!");
         return;
     }
 
@@ -44,23 +53,22 @@ function signUp() {
         .then((userCredential) => {
             const user = userCredential.user;
             return user.updateProfile({ displayName: username }).then(() => {
-                return db.collection("users").doc(user.uid).set({
-                    email: email,
-                    username: username,
-                    wallet: 0  // يبدأ الرصيد بـ 0 جنيه
+                return user.sendEmailVerification().then(() => {
+                    return db.collection("users").doc(user.uid).set({
+                        email: email,
+                        username: username,
+                        wallet: 0  
+                    });
                 });
             }).then(() => {
-                console.log("✅ المستخدم تمت إضافته إلى Firestore:", email);
-                
                 sendTelegramNotification(`🆕 مستخدم جديد سجل في الموقع!\n👤 الاسم: ${username}\n📧 البريد: ${email}`);
-
-                alert('🎉 تم إنشاء الحساب بنجاح!');
-                window.location.href = 'login.html';
+                showPopupMessage('✅ تم إنشاء الحساب بنجاح! الرجاء التحقق من بريدك الإلكتروني.');
+                setTimeout(() => { window.location.href = 'login.html'; }, 2000);
             });
         })
         .catch((error) => {
             console.error("❌ خطأ أثناء تسجيل الحساب:", error);
-            alert(error.message);
+            showPopupMessage(error.message);
         });
 }
 
@@ -70,20 +78,37 @@ function login() {
     const password = document.getElementById('password').value;
 
     if (!email || !password) {
-        alert("❌ الرجاء إدخال البريد وكلمة المرور!");
+        showPopupMessage("❌ الرجاء إدخال البريد وكلمة المرور!");
         return;
     }
 
     firebase.auth().signInWithEmailAndPassword(email, password)
         .then((userCredential) => {
-            console.log("✅ تسجيل الدخول ناجح:", userCredential.user.email);
-            sendTelegramNotification(`🔓 تسجيل دخول جديد!\n📧 البريد: ${userCredential.user.email}`);
-            window.location.href = 'profile2.html';
+            const user = userCredential.user;
+
+            if (!user.emailVerified) {
+                showPopupMessage("⚠️ الرجاء التحقق من بريدك الإلكتروني قبل تسجيل الدخول.");
+                firebase.auth().signOut();
+                return;
+            }
+
+            sendTelegramNotification(`🔓 تسجيل دخول جديد!\n📧 البريد: ${user.email}`);
+            showPopupMessage("✅ تم تسجيل الدخول بنجاح!");
+            setTimeout(() => { window.location.href = 'profile2.html'; }, 1500);
         })
         .catch((error) => {
             console.error("❌ خطأ أثناء تسجيل الدخول:", error.message);
-            alert(error.message);
+            showPopupMessage(error.message);
         });
+}
+
+// ✅ تسجيل الخروج
+function logout() {
+    firebase.auth().signOut().then(() => {
+        sendTelegramNotification("🚪 تم تسجيل خروج أحد المستخدمين.");
+        showPopupMessage("✅ تم تسجيل الخروج بنجاح!");
+        setTimeout(() => { window.location.href = "login.html"; }, 1000);
+    });
 }
 
 // ✅ جلب بيانات المستخدم في `profile2.html`
@@ -91,9 +116,6 @@ firebase.auth().onAuthStateChanged((user) => {
     const currentPage = window.location.pathname;
 
     if (user) {
-        console.log("✅ المستخدم مسجل دخول:", user.email);
-
-        // ✅ جلب بيانات المستخدم إذا كان في `profile2.html`
         if (currentPage === "/profile2.html") {
             db.collection("users").doc(user.uid).onSnapshot((doc) => {
                 if (doc.exists) {
@@ -101,38 +123,17 @@ firebase.auth().onAuthStateChanged((user) => {
                     document.getElementById('user-username').textContent = userData.username;
                     document.getElementById('user-email').textContent = userData.email;
                     document.getElementById('user-wallet').textContent = userData.wallet + " جنيه";
-                    console.log("✅ تم تحميل بيانات المستخدم:", userData);
                 } else {
-                    console.warn("⚠️ لم يتم العثور على بيانات المستخدم في Firestore.");
                     document.getElementById('user-wallet').textContent = "غير متاح";
                 }
-            }, (error) => {
-                console.error("❌ خطأ أثناء جلب البيانات من Firestore:", error);
             });
         }
-
     } else {
-        console.warn("⚠️ لا يوجد مستخدم مسجل دخول!");
-
-        // ✅ إعادة التوجيه إلى `login.html` فقط للصفحات المحمية
         if (currentPage === "/profile2.html") {
-            setTimeout(() => {
-                window.location.href = "login.html";
-            }, 1000);
+            setTimeout(() => { window.location.href = "login.html"; }, 1000);
         }
     }
 });
-
-// ✅ تسجيل الخروج
-function logout() {
-    firebase.auth().signOut().then(() => {
-        console.log("✅ تم تسجيل الخروج! يتم التوجيه إلى صفحة تسجيل الدخول...");
-        sendTelegramNotification("🚪 تم تسجيل خروج أحد المستخدمين.");
-        setTimeout(() => {
-            window.location.href = "login.html";
-        }, 1000);
-    });
-}
 
 // ✅ ربط الدوال بنافذة المتصفح لتكون متاحة في HTML
 window.signUp = signUp;
